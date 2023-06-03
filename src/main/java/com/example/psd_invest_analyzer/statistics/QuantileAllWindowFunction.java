@@ -7,7 +7,6 @@ import org.apache.flink.util.Collector;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @RequiredArgsConstructor(staticName = "ofOrderWithWindowSize")
@@ -21,7 +20,7 @@ class QuantileAllWindowFunction implements AllWindowFunction<Double, Double, Glo
     public void apply(GlobalWindow window, Iterable<Double> values, Collector<Double> out) {
         List<Double> samples = StreamSupport.stream(values.spliterator(), false)
                 .sorted(Comparator.naturalOrder())
-                .collect(Collectors.toList());
+                .toList();
         if (samples.size() == windowSize) {
             int index = (int) Math.ceil(order * samples.size());
             out.collect(samples.get(index - 1));

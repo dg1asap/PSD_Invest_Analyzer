@@ -63,6 +63,7 @@ public class QuantileStatisticTest {
                 .windowSlide(1)
                 .quantileOrder(0.1)
                 .referenceStatistic(999.9)
+                .exceeding(0.01)
                 .sink(new TestingCollectSink())
                 .build();
 

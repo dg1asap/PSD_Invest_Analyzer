@@ -18,6 +18,8 @@ class AverageOfSmallestRatesStatistic implements InvestmentStatistic, Serializab
 
     private final double referenceStatistic;
 
+    private final double exceeding;
+
     private final SinkFunction<String> sink;
 
     @Override
@@ -27,7 +29,7 @@ class AverageOfSmallestRatesStatistic implements InvestmentStatistic, Serializab
                 .apply(SumOfSmallestRatesOfReturn.fromNSamplesAndWindowSize(
                         percentageOfSmallestStatistics*windowSize/100, windowSize))
                 .filter(FilterOfExceedingValueOfReferencesStatistics
-                        .withRefAndExceeding(referenceStatistic, 0.01))
+                        .withRefAndExceeding(referenceStatistic, exceeding))
                 .map(new DoubleToStringWithTimestampMapper())
                 .addSink(sink);
     }

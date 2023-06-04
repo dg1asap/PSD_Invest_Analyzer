@@ -1,6 +1,7 @@
 package com.example.psd_invest_analyzer.api;
 
 import com.example.psd_invest_analyzer.statistics.InvestmentStatistic;
+import com.example.psd_invest_analyzer.statistics.StatisticCalculatorCreator;
 import com.example.psd_investor.ReturnOnInvestmentDto;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -13,6 +14,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Component
@@ -20,22 +22,21 @@ public class StatisticCalculatorController implements ApplicationListener<Contex
 
     private static final Logger logger = LoggerFactory.getLogger(StatisticCalculatorController.class);
 
-    private final ImmutablePair<DataStream<ReturnOnInvestmentDto>, StreamExecutionEnvironment> flinkKafkaDataStream;
+    private final ImmutablePair<Map<String, DataStream<ReturnOnInvestmentDto>>, StreamExecutionEnvironment> flinkKafkaDataStream;
 
-    private final List<InvestmentStatistic> investmentStatistics;
+    private final StatisticCalculatorCreator statisticCalculatorCreator;
 
-    public StatisticCalculatorController(@Qualifier("flinkKafkaDataStream") ImmutablePair<DataStream<ReturnOnInvestmentDto>, StreamExecutionEnvironment> flinkKafkaDataStream,
-                                         @Qualifier("investmentsStatistics") List<InvestmentStatistic> investmentStatistics) {
+    public StatisticCalculatorController(@Qualifier("flinkKafkaDataStream") ImmutablePair<Map<String, DataStream<ReturnOnInvestmentDto>>, StreamExecutionEnvironment> flinkKafkaDataStream,
+                                         StatisticCalculatorCreator statisticCalculatorCreator) {
         this.flinkKafkaDataStream = flinkKafkaDataStream;
-        this.investmentStatistics = investmentStatistics;
+        this.statisticCalculatorCreator = statisticCalculatorCreator;
     }
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         try {
-            DataStream<ReturnOnInvestmentDto> investments = flinkKafkaDataStream.getLeft();
-
-            investmentStatistics.forEach(statistic -> statistic.determine(investments));
+            Map<String, DataStream<ReturnOnInvestmentDto>> investments = flinkKafkaDataStream.getLeft();
+            investments.forEach(this::assignStatisticsToInvestment);
 
             StreamExecutionEnvironment environment = flinkKafkaDataStream.getRight();
             environment.execute("Analyze investment");
@@ -44,7 +45,10 @@ public class StatisticCalculatorController implements ApplicationListener<Contex
         }
     }
 
-
+    private void assignStatisticsToInvestment(String investmentName, DataStream<ReturnOnInvestmentDto> investment) {
+        List<InvestmentStatistic> statistics = statisticCalculatorCreator.createInvestmentStatisticsWithName(investmentName);
+        statistics.forEach(statistic -> statistic.determine(investment));
+    }
 
 
 }

@@ -16,6 +16,8 @@ class AverageStatistic implements InvestmentStatistic, Serializable {
 
     private final double referenceStatistic;
 
+    private final double exceeding;
+
     private final SinkFunction<String> sink;
 
     @Override
@@ -24,7 +26,7 @@ class AverageStatistic implements InvestmentStatistic, Serializable {
                 .countWindowAll(windowSize,windowSlide)
                 .apply(AverageAllWindowFunction.withWindowSize(windowSize))
                 .filter(FilterOfExceedingValueOfReferencesStatistics
-                        .withRefAndExceeding(referenceStatistic, 0.01))
+                        .withRefAndExceeding(referenceStatistic, exceeding))
                 .map(new DoubleToStringWithTimestampMapper())
                 .addSink(sink);
     }

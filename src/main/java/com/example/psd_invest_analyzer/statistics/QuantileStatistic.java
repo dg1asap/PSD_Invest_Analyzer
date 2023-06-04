@@ -17,6 +17,8 @@ class QuantileStatistic implements InvestmentStatistic {
 
     private final double referenceStatistic;
 
+    private final double exceeding;
+
     private final SinkFunction<String> sink;
 
     @Override
@@ -25,7 +27,7 @@ class QuantileStatistic implements InvestmentStatistic {
                 .countWindowAll(windowSize ,windowSlide)
                 .apply(QuantileAllWindowFunction.ofOrderWithWindowSize(quantileOrder, windowSize))
                 .filter(FilterOfExceedingValueOfReferencesStatistics
-                        .withRefAndExceeding(referenceStatistic, 0.01))
+                        .withRefAndExceeding(referenceStatistic, exceeding))
                 .map(new DoubleToStringWithTimestampMapper())
                 .addSink(sink);
     }

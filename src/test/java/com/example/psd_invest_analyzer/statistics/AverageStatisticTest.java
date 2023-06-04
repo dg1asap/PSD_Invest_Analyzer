@@ -62,6 +62,7 @@ public class AverageStatisticTest {
                 .windowSize(12)
                 .windowSlide(1)
                 .referenceStatistic(999.9)
+                .exceeding(0.01)
                 .sink(new TestingCollectSink())
                 .build();
 

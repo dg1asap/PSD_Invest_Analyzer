@@ -19,6 +19,7 @@ public class FlinkConfig {
     @Bean(name = "flinkKafkaDataStream")
     public ImmutablePair<Map<String, DataStream<ReturnOnInvestmentDto>>, StreamExecutionEnvironment> flinkKafkaDataStream() {
         StreamExecutionEnvironment environment = StreamExecutionEnvironment.getExecutionEnvironment();
+        environment.enableCheckpointing(50000);
 
         List<String> topicNames = getInvestmentsTopicName();
         Map<String, DataStream<ReturnOnInvestmentDto>> dataStreams = new HashMap<>();

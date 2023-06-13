@@ -3,6 +3,7 @@ package com.example.psd_invest_analyzer.statistics;
 import org.apache.flink.api.common.serialization.SimpleStringEncoder;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink;
+import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public class StatisticCalculatorCreator {
                 .windowSize(30)
                 .windowSlide(1)
                 .quantileOrder(0.1)
-                .referenceStatistic(0.07)
+                .referenceStatistic(-0.0808)
                 .exceeding(0.01)
                 .sink(createStreamingFileSinkWithPath(
                         STATISTIC_MAIN_DIRECTORY + investmentName + "/quantile"))
@@ -48,7 +49,7 @@ public class StatisticCalculatorCreator {
         return AverageStatistic.builder()
                 .windowSize(30)
                 .windowSlide(1)
-                .referenceStatistic(0.05)
+                .referenceStatistic(0.0101)
                 .exceeding(0.01)
                 .sink(createStreamingFileSinkWithPath(
                         STATISTIC_MAIN_DIRECTORY + investmentName + "/average"))
@@ -57,7 +58,9 @@ public class StatisticCalculatorCreator {
 
     private StreamingFileSink<String> createStreamingFileSinkWithPath(String path) {
         return StreamingFileSink.forRowFormat(new Path(path), new SimpleStringEncoder<String>("UTF-8"))
-                .withBucketCheckInterval(1000)
+                .withRollingPolicy(DefaultRollingPolicy.builder()
+                        .withMaxPartSize(1024 * 10)
+                        .build())
                 .build();
     }
 }

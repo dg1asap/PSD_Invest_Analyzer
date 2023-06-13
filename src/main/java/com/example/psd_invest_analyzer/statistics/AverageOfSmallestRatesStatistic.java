@@ -26,7 +26,7 @@ class AverageOfSmallestRatesStatistic implements InvestmentStatistic, Serializab
     public void determine(DataStream<ReturnOnInvestmentDto> investments) {
         investments.map(ReturnOnInvestmentDto::getValue)
                 .countWindowAll(windowSize,windowSlide)
-                .apply(SumOfSmallestRatesOfReturn.fromNSamplesAndWindowSize(
+                .apply(AverageOfSmallestRatesOfReturn.fromNSamplesAndWindowSize(
                         percentageOfSmallestStatistics*windowSize/100, windowSize))
                 .filter(FilterOfExceedingValueOfReferencesStatistics
                         .withRefAndExceeding(referenceStatistic, exceeding))

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.StreamSupport;
 
 @RequiredArgsConstructor(staticName = "fromNSamplesAndWindowSize")
-class SumOfSmallestRatesOfReturn implements AllWindowFunction<Double, Double, GlobalWindow> {
+class AverageOfSmallestRatesOfReturn implements AllWindowFunction<Double, Double, GlobalWindow> {
 
     private final Integer numberOfSamples;
 
